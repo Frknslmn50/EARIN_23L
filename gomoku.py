@@ -2,7 +2,7 @@
 import random
 
 # Initialize the board
-board_size = 15
+board_size = 10
 board = [[' ' for _ in range(board_size)] for _ in range(board_size)]
 
 
@@ -37,48 +37,96 @@ def check_win(player):
     return False
 
 
-def score_position(player, row, col):
+def evaluate_board(player):
+    """
+    A heuristic evaluation function that calculates the value of a Gomoku game board for a given player.
+    """
+    rows = board_size
+    cols = board_size
     score = 0
-    # Check horizontal score
-    empty_spaces = 0
-    for i in range(5):
-        if col + i < 15:
-            if board[row][col + i] == player:
-                score += 2
-            elif board[row][col + i] == ' ':
-                empty_spaces += 1
-    score += empty_spaces
 
-    # Check vertical score
-    empty_spaces = 0
-    for i in range(5):
-        if row + i < 15:
-            if board[row + i][col] == player:
-                score += 2
-            elif board[row + i][col] == ' ':
-                empty_spaces += 1
-    score += empty_spaces
+    # Count the number of consecutive pieces in all directions
+    for r in range(rows):
+        for c in range(cols):
+            if board[r][c] == player:
+                # Horizontal
+                if c <= cols - 5:
+                    row_score = 1
+                    for i in range(1, 5):
+                        if board[r][c + i] == player:
+                            row_score += 1
+                        else:
+                            break
+                    score += row_score
+                # Vertical
+                if r <= rows - 5:
+                    col_score = 1
+                    for i in range(1, 5):
+                        if board[r + i][c] == player:
+                            col_score += 1
+                        else:
+                            break
+                    score += col_score
+                # Diagonal down-right
+                if c <= cols - 5 and r <= rows - 5:
+                    diag_score = 1
+                    for i in range(1, 5):
+                        if board[r + i][c + i] == player:
+                            diag_score += 1
+                        else:
+                            break
+                    score += diag_score
+                # Diagonal up-right
+                if c <= cols - 5 and r >= 4:
+                    diag_score = 1
+                    for i in range(1, 5):
+                        if board[r - i][c + i] == player:
+                            diag_score += 1
+                        else:
+                            break
+                    score += diag_score
 
-    # Check diagonal (top-left to bottom-right) score
-    empty_spaces = 0
-    for i in range(5):
-        if row + i < 15 and col + i < 15:
-            if board[row + i][col + i] == player:
-                score += 2
-            elif board[row + i][col + i] == ' ':
-                empty_spaces += 1
-    score += empty_spaces
-
-    # Check diagonal (bottom-left to top-right) score
-    empty_spaces = 0
-    for i in range(5):
-        if row - i >= 0 and col + i < 15:
-            if board[row - i][col + i] == player:
-                score += 2
-            elif board[row - i][col + i] == ' ':
-                empty_spaces += 1
-    score += empty_spaces
-
+    # Subtract the number of consecutive pieces of the opponent
+    opponent = 'X' if player == 'O' else 'O'
+    for r in range(rows):
+        for c in range(cols):
+            if board[r][c] == opponent:
+                # Horizontal
+                if c <= cols - 5:
+                    row_score = 1
+                    for i in range(1, 5):
+                        if board[r][c + i] == opponent:
+                            row_score += 1
+                        else:
+                            break
+                    score -= row_score
+                # Vertical
+                if r <= rows - 5:
+                    col_score = 1
+                    for i in range(1, 5):
+                        if board[r + i][c] == opponent:
+                            col_score += 1
+                        else:
+                            break
+                    score -= col_score
+                # Diagonal down-right
+                if c <= cols - 5 and r <= rows - 5:
+                    diag_score = 1
+                    for i in range(1, 5):
+                        if board[r + i][c + i] == opponent:
+                            diag_score += 1
+                        else:
+                            break
+                    score -= diag_score
+                # Diagonal up-right
+                if c <= cols - 5 and r >= 4:
+                    diag_score = 1
+                    for i in range(1, 5):
+                        if board[r - i][c + i] == opponent:
+                            diag_score += 1
+                        else:
+                            break
+                    score -= diag_score
     return score
 
 
@@ -86,11 +134,12 @@ def score_position(player, row, col):
 def minimax_alpha_beta_pruning(player, depth, alpha, beta, maximizing_player):
     # Check for a terminal state (win or tie)
     if check_win(player):
-        return (1000 - depth) if maximizing_player else (-1000 + depth), None
+        return (10000 - depth) if maximizing_player else (-10000 + depth), None
     if check_win('X' if player == 'O' else 'O'):
-        return (-1000 + depth) if maximizing_player else (1000 - depth), None
+        return (-10000 + depth) if maximizing_player else (10000 - depth), None
     if depth == 0:
-        return 0, None
+        score = evaluate_board(player)
+        return score if maximizing_player else -1 * score, None
     # Initialize variables
     best_score = float('-inf') if maximizing_player else float('inf')
     best_move = None
@@ -108,7 +157,8 @@ def minimax_alpha_beta_pruning(player, depth, alpha, beta, maximizing_player):
         row, col = move
         board[row][col] = player
         # Calculate the score for the move
-        score, _ = minimax_alpha_beta_pruning('O' if player == 'X' else 'X', depth - 1, alpha, beta, not maximizing_player)
+        score, _ = minimax_alpha_beta_pruning('O' if player == 'X' else 'X', depth - 1, alpha, beta,
+                                              not maximizing_player)
         # Undo the move
         board[row][col] = ' '
         # Update the best score and best move
@@ -147,7 +197,7 @@ def main():
         if current_player == human_player:
             while True:
                 move = input("Enter your move (e.g. 'a1'): ")
-                if (len(move) == 2 or len(move) == 3) and move[0] in 'abcdefghijklmno' and move[1] in '123456789101112131415':
+                if (len(move) == 2 or len(move) == 3) and move[0] in 'abcdefghij' and move[1] in '12345678910':
                     row = int(move[1:]) - 1
                     col = ord(move[0]) - ord('a')
                     if board[row][col] == ' ':
