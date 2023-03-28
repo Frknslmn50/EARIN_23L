@@ -1,8 +1,10 @@
 # Gomoku (Five in a Row) Game
 import random
 
+import numpy as np
+
 # Initialize the board
-board_size = 10
+board_size = 15
 board = [[' ' for _ in range(board_size)] for _ in range(board_size)]
 
 
@@ -45,46 +47,71 @@ def evaluate_board(player):
     cols = board_size
     score = 0
 
+    # Keep track of evaluated pieces to avoid double counting
+    evaluated_pieces = np.zeros((board_size, board_size))
+
     # Count the number of consecutive pieces in all directions
     for r in range(rows):
         for c in range(cols):
-            if board[r][c] == player:
+            if board[r][c] == player and evaluated_pieces[r, c] == 0:
                 # Horizontal
                 if c <= cols - 5:
                     row_score = 1
                     for i in range(1, 5):
+                        if evaluated_pieces[r, c+i]:
+                            break
                         if board[r][c + i] == player:
                             row_score += 1
+                            evaluated_pieces[r, c + i] += 1
                         else:
                             break
+                    if row_score == 5:
+                        return 1000
                     score += row_score
                 # Vertical
                 if r <= rows - 5:
                     col_score = 1
                     for i in range(1, 5):
+                        if evaluated_pieces[r+i, c]:
+                            break
                         if board[r + i][c] == player:
                             col_score += 1
+                            evaluated_pieces[r + i, c] += 1
                         else:
                             break
+                    if col_score == 5:
+                        return 1000
                     score += col_score
                 # Diagonal down-right
                 if c <= cols - 5 and r <= rows - 5:
                     diag_score = 1
                     for i in range(1, 5):
+                        if evaluated_pieces[r+i, c+i]:
+                            break
                         if board[r + i][c + i] == player:
                             diag_score += 1
+                            evaluated_pieces[r + i, c + i] += 1
                         else:
                             break
+                    if diag_score == 5:
+                        return 1000
                     score += diag_score
                 # Diagonal up-right
                 if c <= cols - 5 and r >= 4:
                     diag_score = 1
                     for i in range(1, 5):
+                        if evaluated_pieces[r-i, c-i]:
+                            break
                         if board[r - i][c + i] == player:
                             diag_score += 1
+                            evaluated_pieces[r - i, c + i] += 1
                         else:
                             break
+                    if diag_score == 5:
+                        return 1000
                     score += diag_score
+
+    evaluated_pieces = np.zeros((board_size, board_size))
 
     # Subtract the number of consecutive pieces of the opponent
     opponent = 'X' if player == 'O' else 'O'
@@ -95,37 +122,54 @@ def evaluate_board(player):
                 if c <= cols - 5:
                     row_score = 1
                     for i in range(1, 5):
+                        if evaluated_pieces[r, c+i]:
+                            break
                         if board[r][c + i] == opponent:
                             row_score += 1
+                            evaluated_pieces[r, c + i] += 1
                         else:
                             break
+                    if row_score == 5:
+                        return -1000
                     score -= row_score
                 # Vertical
                 if r <= rows - 5:
                     col_score = 1
                     for i in range(1, 5):
+                        if evaluated_pieces[r+i, c]:
+                            break
                         if board[r + i][c] == opponent:
                             col_score += 1
                         else:
                             break
+                    if col_score == 5:
+                        return -1000
                     score -= col_score
                 # Diagonal down-right
                 if c <= cols - 5 and r <= rows - 5:
                     diag_score = 1
                     for i in range(1, 5):
+                        if evaluated_pieces[r+i, c+i]:
+                            break
                         if board[r + i][c + i] == opponent:
                             diag_score += 1
                         else:
                             break
+                    if diag_score == 5:
+                        return -1000
                     score -= diag_score
                 # Diagonal up-right
                 if c <= cols - 5 and r >= 4:
                     diag_score = 1
                     for i in range(1, 5):
+                        if evaluated_pieces[r-i, c-i]:
+                            break
                         if board[r - i][c + i] == opponent:
                             diag_score += 1
                         else:
                             break
+                    if diag_score == 5:
+                        return -1000
                     score -= diag_score
     return score
 
@@ -197,7 +241,7 @@ def main():
         if current_player == human_player:
             while True:
                 move = input("Enter your move (e.g. 'a1'): ")
-                if (len(move) == 2 or len(move) == 3) and move[0] in 'abcdefghij' and move[1] in '12345678910':
+                if (len(move) == 2 or len(move) == 3) and move[0] in 'abcdefghijklmno' and move[1] in '123456789101112131415':
                     row = int(move[1:]) - 1
                     col = ord(move[0]) - ord('a')
                     if board[row][col] == ' ':
