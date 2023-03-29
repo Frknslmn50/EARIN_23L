@@ -3,12 +3,12 @@ import random
 
 import numpy as np
 
-# Initialize the board
+# Initializing the board
 board_size = 15
 board = [[' ' for _ in range(board_size)] for _ in range(board_size)]
 
 
-# Define a function to print the board
+# Function to print the board
 def print_board():
     print("   ", end="")
     for i in range(board_size):
@@ -21,6 +21,7 @@ def print_board():
         print()
 
 
+# Function to check if a given player wins the game.
 def check_win(player):
     # Check horizontal, vertical, and diagonal wins
     for i in range(board_size):
@@ -54,11 +55,11 @@ def evaluate_board(player):
     for r in range(rows):
         for c in range(cols):
             if board[r][c] == player and evaluated_pieces[r, c] == 0:
-                # Horizontal
+                # Horizontal consecutive pieces
                 if c <= cols - 5:
                     row_score = 1
                     for i in range(1, 5):
-                        if evaluated_pieces[r, c+i]:
+                        if evaluated_pieces[r, c + i]:
                             break
                         if board[r][c + i] == player:
                             row_score += 1
@@ -72,7 +73,7 @@ def evaluate_board(player):
                 if r <= rows - 5:
                     col_score = 1
                     for i in range(1, 5):
-                        if evaluated_pieces[r+i, c]:
+                        if evaluated_pieces[r + i, c]:
                             break
                         if board[r + i][c] == player:
                             col_score += 1
@@ -86,7 +87,7 @@ def evaluate_board(player):
                 if c <= cols - 5 and r <= rows - 5:
                     diag_score = 1
                     for i in range(1, 5):
-                        if evaluated_pieces[r+i, c+i]:
+                        if evaluated_pieces[r + i, c + i]:
                             break
                         if board[r + i][c + i] == player:
                             diag_score += 1
@@ -100,7 +101,7 @@ def evaluate_board(player):
                 if c <= cols - 5 and r >= 4:
                     diag_score = 1
                     for i in range(1, 5):
-                        if evaluated_pieces[r-i, c-i]:
+                        if evaluated_pieces[r - i, c - i]:
                             break
                         if board[r - i][c + i] == player:
                             diag_score += 1
@@ -110,7 +111,7 @@ def evaluate_board(player):
                     if diag_score == 5:
                         return 1000
                     score += diag_score
-
+# Clear the content of evaluated_pieces for the calculation of opposite player's pieces.
     evaluated_pieces = np.zeros((board_size, board_size))
 
     # Subtract the number of consecutive pieces of the opponent
@@ -122,7 +123,7 @@ def evaluate_board(player):
                 if c <= cols - 5:
                     row_score = 1
                     for i in range(1, 5):
-                        if evaluated_pieces[r, c+i]:
+                        if evaluated_pieces[r, c + i]:
                             break
                         if board[r][c + i] == opponent:
                             row_score += 1
@@ -136,7 +137,7 @@ def evaluate_board(player):
                 if r <= rows - 5:
                     col_score = 1
                     for i in range(1, 5):
-                        if evaluated_pieces[r+i, c]:
+                        if evaluated_pieces[r + i, c]:
                             break
                         if board[r + i][c] == opponent:
                             col_score += 1
@@ -149,7 +150,7 @@ def evaluate_board(player):
                 if c <= cols - 5 and r <= rows - 5:
                     diag_score = 1
                     for i in range(1, 5):
-                        if evaluated_pieces[r+i, c+i]:
+                        if evaluated_pieces[r + i, c + i]:
                             break
                         if board[r + i][c + i] == opponent:
                             diag_score += 1
@@ -162,7 +163,7 @@ def evaluate_board(player):
                 if c <= cols - 5 and r >= 4:
                     diag_score = 1
                     for i in range(1, 5):
-                        if evaluated_pieces[r-i, c-i]:
+                        if evaluated_pieces[r - i, c - i]:
                             break
                         if board[r - i][c + i] == opponent:
                             diag_score += 1
@@ -174,7 +175,7 @@ def evaluate_board(player):
     return score
 
 
-# Define the Minimax algorithm with Alpha-Beta pruning
+# Definition of the Minimax algorithm with Alpha-Beta pruning
 def minimax_alpha_beta_pruning(player, depth, alpha, beta, maximizing_player):
     # Check for a terminal state (win or tie)
     if check_win(player):
@@ -187,20 +188,20 @@ def minimax_alpha_beta_pruning(player, depth, alpha, beta, maximizing_player):
     # Initialize variables
     best_score = float('-inf') if maximizing_player else float('inf')
     best_move = None
-    # Generate all possible moves
+    # Generate all possible moves (select all empty cells)
     moves = []
     for i in range(board_size):
         for j in range(board_size):
             if board[i][j] == ' ':
                 moves.append((i, j))
-    # Shuffle the moves to avoid always choosing the same move
+    # Shuffle the moves to avoid always choosing the same moves
     random.shuffle(moves)
     # Iterate over all possible moves
     for move in moves:
         # Apply the move
         row, col = move
         board[row][col] = player
-        # Calculate the score for the move
+        # Calculate the score after the move (deepening the search)
         score, _ = minimax_alpha_beta_pruning('O' if player == 'X' else 'X', depth - 1, alpha, beta,
                                               not maximizing_player)
         # Undo the move
@@ -211,14 +212,14 @@ def minimax_alpha_beta_pruning(player, depth, alpha, beta, maximizing_player):
                 best_score = score
                 best_move = move
             alpha = max(alpha, best_score)
-            if alpha >= beta:
+            if alpha >= beta:  # minimizing_player won't choose current move because there is a move with lower score
                 break
         else:
             if score < best_score:
                 best_score = score
                 best_move = move
             beta = min(beta, best_score)
-            if beta <= alpha:
+            if beta <= alpha:  # maximizing_player won't choose current move because there is a move with higher score
                 break
     # Return the best score and best move
     return best_score, best_move
@@ -250,7 +251,8 @@ def main():
             board[row][col] = current_player
         else:
             # Get the AI's move using Minimax with Alpha-Beta pruning
-            _, (row, col) = minimax_alpha_beta_pruning(current_player, 3, float('-inf'), float('inf'), True)
+            # depth limit is 3, initial alpha = inf, initial beta = -inf, current player selected as maximizing
+            _, (row, col) = minimax_alpha_beta_pruning(current_player, 2, float('-inf'), float('inf'), True)
             # Update the board
             board[row][col] = current_player
             print("AI chooses", chr(ord('a') + col), row + 1)
