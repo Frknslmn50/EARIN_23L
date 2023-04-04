@@ -1,6 +1,5 @@
-# Gomoku (Five in a Row) Game
+# Gomoku (Five in a Row) Game Implementation Using Minimax with Alpha-Beta Pruning
 import random
-
 import numpy as np
 
 # Initializing the board
@@ -40,10 +39,8 @@ def check_win(player):
     return False
 
 
+# A heuristic evaluation function that calculates the value of a Gomoku game board for a given player.
 def evaluate_board(player):
-    """
-    A heuristic evaluation function that calculates the value of a Gomoku game board for a given player.
-    """
     rows = board_size
     cols = board_size
     score = 0
@@ -242,7 +239,8 @@ def main():
         if current_player == human_player:
             while True:
                 move = input("Enter your move (e.g. 'a1'): ")
-                if (len(move) == 2 or len(move) == 3) and move[0] in 'abcdefghijklmno' and move[1] in '123456789101112131415':
+                if (len(move) == 2 or len(move) == 3) and move[0] in 'abcdefghijklmno' and \
+                        move[1] in '123456789101112131415':
                     row = int(move[1:]) - 1
                     col = ord(move[0]) - ord('a')
                     if board[row][col] == ' ':
@@ -251,7 +249,7 @@ def main():
             board[row][col] = current_player
         else:
             # Get the AI's move using Minimax with Alpha-Beta pruning
-            # depth limit is 3, initial alpha = inf, initial beta = -inf, current player selected as maximizing
+            # depth limit is 2, initial alpha = inf, initial beta = -inf, current player selected as maximizing
             _, (row, col) = minimax_alpha_beta_pruning(current_player, 2, float('-inf'), float('inf'), True)
             # Update the board
             board[row][col] = current_player
