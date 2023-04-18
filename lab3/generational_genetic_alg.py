@@ -119,7 +119,7 @@ def main():
     best_individual = population[np.argmax(fitness_values)]
     best_fitness = np.max(fitness_values)
     print("Best solution found: x = {}, y = {}, f(x,y) = {}".format(best_individual[0], best_individual[1],
-                                                                      -best_fitness))
+                                                                    -best_fitness))
 
     # Print the optimization time
     optimization_time = end_time - start_time
@@ -127,6 +127,7 @@ def main():
 
     # Plot the best fitness value of each generation
     plt.plot(range(num_generations), best_fitness_values)
+    plt.title('Best Fitness Values Over Generations')
     plt.xlabel('Generation')
     plt.ylabel('Best fitness value')
     plt.show()
