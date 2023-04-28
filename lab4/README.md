@@ -1,5 +1,5 @@
 **Classifying Iris Dataset using Multi-class Logistic Regression and Decision Tree.**
-<br>To run source code : *regression_classification.py* Following packages should be downloaded on your system:
+<br>To run jupyter notebook : *regression_classification.ipynb* Following packages should be downloaded on your system:
 - math (comes with python)
 - numpy
 - pandas
