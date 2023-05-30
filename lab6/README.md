@@ -1,5 +1,5 @@
 **Reinforcement Learning using Q-Learning.**
-<br>To run jupyter notebook : *regression_classification.ipynb* One should have conda and Following packages should be downloaded on your system:
+<br>To run jupyter notebook : *ReinforcementLearning.ipynb* One should have conda and Following packages should be downloaded on your system:
 
   - gymnasium
   - matplotlib
