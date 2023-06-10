@@ -25,3 +25,4 @@ To run the models you should first run the following notebook:
 Then you can run the following notebooks:
 - ContentBasedTraining.ipynb : Includes the code for training the content-based model.
 - CollaborativeFilteringTraining.ipynb : Includes the code for training the collaborative filtering model.
+- HybridModel.ipynb : Includes the code for training the hybrid model.
