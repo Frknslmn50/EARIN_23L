@@ -22,7 +22,7 @@ You can use the following commands in the terminal to download these packages us
 To run the models you should first run the following notebook:
 - ExploratoryDataAnalysis.ipynb : Includes the code for data analysis, visualization and preprocessing.
 
-Then you can run the following notebooks:
+Then you can run the following notebooks with the order given below:
 - ContentBasedTraining.ipynb : Includes the code for training the content-based model.
 - CollaborativeFilteringTraining.ipynb : Includes the code for training the collaborative filtering model.
 - HybridModel.ipynb : Includes the code for training the hybrid model.
